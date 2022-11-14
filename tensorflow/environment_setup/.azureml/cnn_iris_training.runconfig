@@ -1,0 +1,23 @@
+framework: Python
+script: cnn_iris_training.py
+communicator: None
+autoPrepareEnvironment: true
+maxRunDurationSeconds:
+nodeCount: 1
+environment:
+  name: iris_cnn_training
+  python:
+    userManagedDependencies: true
+    interpreterPath: python
+  docker:
+    enabled: true
+    baseImage: 54646eeace594cf19143dad3c7f31661.azurecr.io/azureml/azureml_b17300b63a1c2abb86b2e774835153ee
+    sharedVolumes: true
+    gpuSupport: false
+    shmSize: 15g
+    arguments: []
+history:
+  outputCollection: true
+  snapshotProject: true
+  directoriesToWatch:
+  - logs
