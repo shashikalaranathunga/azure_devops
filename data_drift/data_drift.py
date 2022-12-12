@@ -38,15 +38,6 @@ class IRISDataDriftTester():
         self.run = Run.get_context()
         self.workspace = self.run.experiment.workspace
 
-    def dataset_to_update(self):
-        '''
-        Get the latest data from blob source to update the dataset
-        Returns :
-            df : Pandas Dataframe with latest data
-        '''
-        df = pd.read_csv(self.args.blob_sas_url)
-
-        return df
 
     def get_latest_dataframe_versions(self, dataset_name, num_versions=2):
         v_dataset = Dataset.get_all(workspace= self.workspace )[dataset_name]
@@ -154,7 +145,7 @@ class IRISDataDriftTester():
             if is_string_dtype(previous_df[feature]):
                 continue
             else:
-                psi = calculate_psi(previous_df[feature], current_df[feature], "quantiles")
+                psi = self.calculate_psi(previous_df[feature], current_df[feature], "quantiles")
                 psi_dict[feature] = psi
         
         return psi_dict
@@ -171,7 +162,7 @@ class IRISDataDriftTester():
 
     def create_pipeline(self):
         '''
-        IRIS Dataset Versioning Pipeline
+        IRIS Dataset Drift Detection Pipeline
         '''        
 
         dataset_arr = self.get_latest_dataframe_versions(self.args.dataset_name)
