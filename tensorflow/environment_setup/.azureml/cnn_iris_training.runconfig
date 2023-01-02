@@ -7,8 +7,10 @@ nodeCount: 1
 environment:
   name: iris_cnn_training
   python:
-    userManagedDependencies: true
+    userManagedDependencies: false
     interpreterPath: python
+    condaDependenciesFile: .azureml/conda_dependencies.yml
+    baseCondaEnvironment:
   docker:
     enabled: true
     baseImage: 54646eeace594cf19143dad3c7f31661.azurecr.io/azureml/azureml_b17300b63a1c2abb86b2e774835153ee
