@@ -133,7 +133,7 @@ class IRISClassification():
 
         model.fit(X_train, y_train, validation_data=(X_test, y_test) ,epochs=1000, callbacks=[ES])
         
-        y_pred = np.argmax(y_pred, axis=1)
+        y_pred = model.predict(X_test)
         y_test = np.argmax(y_test, axis=1)
 
         print(f"Model Accuracy:{accuracy_score(y_test, y_pred)*100}%")
