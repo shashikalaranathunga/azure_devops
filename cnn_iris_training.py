@@ -122,7 +122,7 @@ class IRISClassification():
         encoder = OneHotEncoder(sparse=False)
         y = encoder.fit_transform(y)
 
-        X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
+        X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(X, y, x_indices , test_size=0.25, stratify=y)
 
         X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -132,18 +132,18 @@ class IRISClassification():
 
         model = self.get_model()
 
-        model.fit(X_train, y_train, validation_data=(X_test, y_test) ,epochs=1000, callbacks=[ES])
+        model.fit(X_train, y_train, validation_data=(X_test, y_test) ,epochs=100, callbacks=[ES])
         
         y_pred = model.predict(X_test)
-        y_pred = np.argmax(y_pred, axis=1).ravel()
-        y_test = np.argmax(y_test, axis=1).ravel()
+        y_pred = np.argmax(y_pred, axis=1)
+        y_test = np.argmax(y_test, axis=1)
 
         print(f"Model Accuracy:{accuracy_score(y_test, y_pred)*100}%")
 
         os.makedirs(os.path.dirname(self.args.model_path), exist_ok=True)
         model.save(self.args.model_path)
 
-        self.validate(y_test, y_pred, X_test)
+        self.validate(y_test, y_pred, final_df.iloc[test_indices])
 
         match = re.search('([^\/]*)$', self.args.model_path)
         # Upload Model to Run artifacts
@@ -184,8 +184,6 @@ class IRISClassification():
         '''
         pred_output = {"Actual Species" : y_true, "Predicted Species": y_pred}        
         pred_df = pd.DataFrame(pred_output)
-        pred_df = pred_df.reset_index()
-        X_test = X_test.reset_index()
         final_df = pd.concat([X_test, pred_df], axis=1)
         final_df.to_csv(name+".csv", index=False)
         self.run.upload_file(name="./outputs/"+name+".csv",path_or_stream=name+".csv")
