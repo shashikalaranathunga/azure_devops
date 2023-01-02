@@ -182,7 +182,7 @@ class IRISClassification():
         '''
         Create prediction results as a CSV
         '''
-        pred_output = {"Actual Species" : y_true['Species'].values, "Predicted Species": y_pred['Species'].values}        
+        pred_output = {"Actual Species" : y_true, "Predicted Species": y_pred}        
         pred_df = pd.DataFrame(pred_output)
         pred_df = pred_df.reset_index()
         X_test = X_test.reset_index()
