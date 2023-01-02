@@ -122,7 +122,7 @@ class IRISClassification():
         encoder = OneHotEncoder(sparse=False)
         y = encoder.fit_transform(y)
 
-        X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(X, y, x_indices , test_size=0.25, stratify=y)
+        X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(X, y, list(final_df.index) , test_size=0.25, stratify=y)
 
         X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
