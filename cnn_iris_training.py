@@ -200,7 +200,7 @@ class IRISClassification():
         self.create_confusion_matrix(y_true, y_pred, "confusion_matrix")
 
         y_pred_df = pd.DataFrame(y_pred, columns = ['Species'])
-        self.create_outputs(y_true, y_pred_df,X_test, "predictions")
+        # self.create_outputs(y_true, y_pred_df,X_test, "predictions")
         self.run.tag("IRISClassifierFinalRun")        
 
 if __name__ == "__main__":
