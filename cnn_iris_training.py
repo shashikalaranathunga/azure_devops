@@ -120,9 +120,9 @@ class IRISClassification():
         y = np.array(y).reshape(-1, 1)
 
         encoder = OneHotEncoder(sparse=False)
-        y = encoder.fit_transform(y)
+        y_t = encoder.fit_transform(y)
 
-        X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(X, y, list(final_df.index) , test_size=0.25, stratify=y)
+        X_train, X_test, y_train, y_test, train_indices, test_indices = train_test_split(X, y_t, list(final_df.index) , test_size=0.25, stratify=final_df[["Species"]])
 
         X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -184,7 +184,11 @@ class IRISClassification():
         '''
         pred_output = {"Actual Species" : y_true, "Predicted Species": y_pred}        
         pred_df = pd.DataFrame(pred_output)
+        pred_df = pred_df.reset_index()
+        X_test = X_test.reset_index()        
         final_df = pd.concat([X_test, pred_df], axis=1)
+        final_df =  final_df.drop("index", axis=1)
+ 
         final_df.to_csv(name+".csv", index=False)
         self.run.upload_file(name="./outputs/"+name+".csv",path_or_stream=name+".csv")
 
