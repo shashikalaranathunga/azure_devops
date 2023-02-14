@@ -6,9 +6,6 @@ from azureml.core import Workspace, Datastore, Dataset
 from azureml.core.model import Model
 from azureml.core.run import Run
 import argparse
-import json
-import time
-#import traceback
 import logging
 
 from sklearn.model_selection import train_test_split
@@ -17,7 +14,6 @@ from sklearn.metrics import classification_report, confusion_matrix, precision_s
 import pandas as pd
 import numpy as np
 import re
-import math
 import seaborn as sn
 import matplotlib.pyplot as plt
 import subprocess

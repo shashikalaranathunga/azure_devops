@@ -25,6 +25,7 @@ import subprocess
 import joblib
 
 import tensorflow as tf
+import mlflow
 
 '''
 IRIS Classification
@@ -99,6 +100,13 @@ class IRISClassification():
 
         print(model.summary())
         return model
+    
+    def train_model(self, X_train, X_test, y_train, y_test, model):
+        # Early Stopping to prevent overfitting 
+        ES = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
+ 
+        model.fit(X_train, y_train, validation_data=(X_test, y_test) ,epochs=100, callbacks=[ES], verbose=0)
+        return model
 
     def create_pipeline(self):
         '''
@@ -132,7 +140,14 @@ class IRISClassification():
 
         model = self.get_model()
 
-        model.fit(X_train, y_train, validation_data=(X_test, y_test) ,epochs=100, callbacks=[ES])
+        with mlflow.start_run(run_name="mlflow_test"):
+            # Automatically capture the model's parameters, metrics, artifacts,
+            # and source code with the `autolog()` function
+            mlflow.tensorflow.autolog(log_models=True)
+
+            model = self.train_model(X_train, X_test, y_train, y_test)
+            # mlflow.tensorflow.log_model(model, artifact_path="model")
+            run_id = mlflow.active_run().info.run_id
         
         y_pred = model.predict(X_test)
         y_pred = np.argmax(y_pred, axis=1)
@@ -140,19 +155,13 @@ class IRISClassification():
 
         print(f"Model Accuracy:{accuracy_score(y_test, y_pred)*100}%")
 
-        os.makedirs(os.path.dirname(self.args.model_path), exist_ok=True)
-        model.save(self.args.model_path)
+        # os.makedirs(os.path.dirname(self.args.model_path), exist_ok=True)
+        # model.save(self.args.model_path)
+        model_name = "mlflow_cnn"
+        mlflow.register_model(f"runs:/{run_id}/model", model_name)
 
         self.validate(y_test, y_pred, final_df.iloc[test_indices])
 
-        match = re.search('([^\/]*)$', self.args.model_path)
-        # Upload Model to Run artifacts
-        self.run.upload_file(name=self.args.artifact_loc + match.group(1),
-                                path_or_stream=self.args.model_path)
-
-        print("Run Files : ", self.run.get_file_names())
-        subprocess.run("pip freeze > requirements.txt", shell=True)
-        self.run.upload_file(name="./outputs/requirements.txt",path_or_stream="requirements.txt")
         self.run.complete()
 
     def create_confusion_matrix(self, y_true, y_pred, name):

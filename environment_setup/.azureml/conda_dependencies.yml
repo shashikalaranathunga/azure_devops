@@ -31,4 +31,5 @@ dependencies:
       - regex>=2020.2.20
       - seaborn
       - joblib
-      - tensorflow-cpu 
+      - tensorflow-cpu
+      - mlflow<3,>=2.1 
