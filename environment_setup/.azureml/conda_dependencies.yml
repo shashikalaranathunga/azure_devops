@@ -33,3 +33,4 @@ dependencies:
       - joblib
       - tensorflow-cpu
       - mlflow<3,>=2.1 
+      - azureml-mlflow
