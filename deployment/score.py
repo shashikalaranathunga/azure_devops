@@ -15,7 +15,8 @@ def init():
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
-    model_path = f"models:/mlflow_cnn/latest"
+    # model_path = f"models:/mlflow_cnn/latest"
+    model_path = "azureml://locations/eastus/workspaces/54646eea-ce59-4cf1-9143-dad3c7f31661/models/mlflow_cnn/versions/1"
     model = mlflow.pyfunc.load_model(model_path)
 
 def run(raw_data):
