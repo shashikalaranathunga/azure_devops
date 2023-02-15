@@ -147,7 +147,7 @@ class IRISClassification():
             # and source code with the `autolog()` function
             mlflow.tensorflow.autolog(log_models=True)
 
-            model = self.train_model(X_train, X_test, y_train, y_test)
+            model = self.train_model(X_train, X_test, y_train, y_test, model)
             # mlflow.tensorflow.log_model(model, artifact_path="model")
             run_id = mlflow.active_run().info.run_id
             mlflow.tensorflow.save_model(model, "./cnn_model")
