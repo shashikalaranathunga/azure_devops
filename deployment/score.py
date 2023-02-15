@@ -18,17 +18,11 @@ from sklearn.metrics import classification_report, confusion_matrix, precision_s
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+import tensorflow as tf
+import mlflow
 
 def get_test_df():
-    # CONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=irisworkstorage7c89faa70;AccountKey=bRffNtnDwuDZC0ipKZ41QX/tcTzzKCEx6NmT2qpk7ytn3Hlsm/CTVVgPncuJIf2OjugwYf0TOod0+AStl2JyUg==;EndpointSuffix=core.windows.net"
-    # CONTAINERNAME= "azureml-blobstore-741f0fc5-f78a-43dc-a80d-11429fa307fa"
-    # BLOBNAME= "irisdata/Iris.csv"
-
-    # blob = BlobClient.from_connection_string(conn_str=CONNECTIONSTRING, container_name=CONTAINERNAME, blob_name=BLOBNAME)
-
-    # blob_data = blob.download_blob().readall()
-    # df = pd.read_csv(BytesIO(blob_data))
-    df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-original/iris_original.csv?sp=r&st=2022-11-04T10:19:36Z&se=2023-01-01T18:19:36Z&sv=2021-06-08&sr=b&sig=K6NFJz6pA51tH7eYQnhG5HPHnwS6u7V55LQ1bPMjYlo%3D")
+    df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-data/Iris.csv?sp=r&st=2023-01-04T12:09:50Z&se=2023-10-04T20:09:50Z&sv=2021-06-08&sr=b&sig=qmV8QDfGSLJ%2BJlg1FMqcZO3wc8YGDMzN3ewgjtadzpY%3D")
     return df
 
 def get_best_model(model_arr):
@@ -61,16 +55,8 @@ def init():
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
-    dt_model_path = Model.get_model_path('IRIS_DT')
-    svm_model_path = Model.get_model_path('IRIS_SVM')    
-    # deserialize the model file back into a sklearn model
-    dt_model = joblib.load(dt_model_path+"/"+"dt_iris_model.pkl")
-    svm_model = joblib.load(svm_model_path+"/"+"svm_iris_model.pkl")
-    
-    model = get_best_model([dt_model, svm_model])
-    print("Best model type", type(model).__name__)
-    logging.info("Init complete")
-    print('IRIS model loaded...')
+    model_path = f"models:/mlflow_cnn/latest"
+    model = mlflow.pyfunc.load_model(model_path)
 
 def run(raw_data):
     """
@@ -86,7 +72,7 @@ def run(raw_data):
         petal_l_cm = data['PetalLengthCm']
         petal_w_cm = data['PetalWidthCm']
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
-        result = model.predict(test_X)
+        result = 1
     except Exception as err:
         traceback.print_exc()
     logging.info("Request processed")
