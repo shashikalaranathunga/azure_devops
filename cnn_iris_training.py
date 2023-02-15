@@ -44,6 +44,8 @@ class IRISClassification():
         self.args = args
         self.run = Run.get_context()
         self.workspace = self.run.experiment.workspace
+        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri())
+        mlflow.set_experiment("cnn_iris_training_v2")
         os.makedirs('./model_metas', exist_ok=True)
 
     def get_latest_dataset_version(self, dataset_name):
@@ -148,6 +150,7 @@ class IRISClassification():
             model = self.train_model(X_train, X_test, y_train, y_test)
             # mlflow.tensorflow.log_model(model, artifact_path="model")
             run_id = mlflow.active_run().info.run_id
+            mlflow.tensorflow.save_model(model, "./cnn_model")
         
         y_pred = model.predict(X_test)
         y_pred = np.argmax(y_pred, axis=1)
@@ -158,7 +161,9 @@ class IRISClassification():
         # os.makedirs(os.path.dirname(self.args.model_path), exist_ok=True)
         # model.save(self.args.model_path)
         model_name = "mlflow_cnn"
-        mlflow.register_model(f"runs:/{run_id}/model", model_name)
+        # mlflow.register_model(f"runs:/{run_id}/model", model_name)
+        model_local_path = "./cnn_model"
+        mlflow.register_model(f"file://{model_local_path}", model_name)
 
         self.validate(y_test, y_pred, final_df.iloc[test_indices])
 
