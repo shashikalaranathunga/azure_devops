@@ -22,7 +22,7 @@ import tensorflow as tf
 import mlflow
 
 def get_test_df():
-    df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-data/Iris.csv?sp=r&st=2023-01-04T12:09:50Z&se=2023-10-04T20:09:50Z&sv=2021-06-08&sr=b&sig=qmV8QDfGSLJ%2BJlg1FMqcZO3wc8YGDMzN3ewgjtadzpY%3D")
+    df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-data/Iris.csv?sp=r&st=2023-03-03T08:28:44Z&se=2023-09-01T16:28:44Z&sv=2021-06-08&sr=b&sig=61N71wu0%2BIDHQf%2B5hQxGngA4RdYmRLhIJ%2BUvJC3dRHA%3D")
     return df
 
 def get_best_model(model_arr):
@@ -72,7 +72,7 @@ def run(raw_data):
         petal_l_cm = data['PetalLengthCm']
         petal_w_cm = data['PetalWidthCm']
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
-        result = 1
+        result = model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
     logging.info("Request processed")
