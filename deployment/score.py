@@ -33,10 +33,16 @@ def get_best_model(model_arr):
     best_model = None
     best_score = 0
     for model in model_arr:
-        score = precision_score(y_test, model.predict(X_test), average='weighted')
+        if isinstance(model, tf.keras.Model):
+            preds = model.predict(np.array(X_test)[..., np.newaxis])
+            y_pred = np.argmax(preds, axis=1)
+            score = precision_score(y_test, y_pred, average='weighted')
+        else:
+            score = precision_score(y_test, model.predict(X_test), average='weighted')
         if score > best_score:
             best_score = score
             best_model = model
+
     return best_model
 
 
@@ -46,6 +52,7 @@ def init():
     You can write the logic here to perform init operations like caching the model in memory
     """
     global model
+    global is_tf
     # AZUREML_MODEL_DIR is an environment variable created during deployment.
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
@@ -57,7 +64,15 @@ def init():
     model_dt_path = Model.get_model_path('mlflow_dt')
     model_dt = mlflow.pyfunc.load_model(model_dt_path)
 
-    model = model_dt
+    model = get_best_model([model_cnn, model_svm, model_dt])
+    is_tf = isinstance(model, tf.keras.Model)
+
+    if is_tf:
+        print("Best model type - Tensorflow CNN")
+    else:
+        print("Best model type", type(model).__name__)
+
+    logging.info("Init complete")
 
 def run(raw_data):
     """
@@ -73,8 +88,13 @@ def run(raw_data):
         petal_l_cm = data['PetalLengthCm']
         petal_w_cm = data['PetalWidthCm']
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
-        return model.predict(test_X)
+
+        if is_tf:
+            preds = model.predict(np.array(test_X)[..., np.newaxis]) 
+            return np.argmax(preds, axis=1)
+        else:
+            return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
     logging.info("Request processed")
-    return 1
+    return "Error"
