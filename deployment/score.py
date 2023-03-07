@@ -8,9 +8,36 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, accuracy_score
+from sklearn.model_selection import train_test_split
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import mlflow
+
+def get_test_df():
+
+    df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-original/iris_original.csv?sp=r&st=2023-03-07T06:17:08Z&se=2023-07-01T14:17:08Z&sv=2021-06-08&sr=b&sig=5JjD%2Bp%2FSi4Tv%2F%2BoGyHmaIyNyiaxmH%2BBv7K%2FK%2F6QROGI%3D")
+    return df
+
+def get_best_model(model_arr):
+    """
+    This function is called to get the best model from the model array
+    """
+    df = get_test_df() 
+
+    X = df[["SepalLengthCm","SepalWidthCm","PetalLengthCm","PetalWidthCm"]]
+    y = df[["Species"]]
+
+    X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
+
+    best_model = None
+    best_score = 0
+    for model in model_arr:
+        score = precision_score(y_test, model.predict(X_test), average='weighted')
+        if score > best_score:
+            best_score = score
+            best_model = model
+    return best_model
 
 
 def init():
@@ -46,7 +73,7 @@ def run(raw_data):
         petal_l_cm = data['PetalLengthCm']
         petal_w_cm = data['PetalWidthCm']
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
-        return 1
+        return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
     logging.info("Request processed")
