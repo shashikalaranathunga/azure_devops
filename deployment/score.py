@@ -97,7 +97,7 @@ def run(raw_data):
             preds = model.predict(np.array(test_X)[..., np.newaxis]) 
             return list(np.argmax(preds, axis=1))
         else:
-            retun 1
+            return 1
             return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
