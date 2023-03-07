@@ -2,6 +2,7 @@ import traceback
 import logging
 import json
 
+from azureml.core.model import Model
 import tensorflow as tf
 import mlflow
 
@@ -16,7 +17,7 @@ def init():
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
     # model_path = f"models:/mlflow_cnn/latest"
-    model_path = "azureml://locations/eastus/workspaces/54646eea-ce59-4cf1-9143-dad3c7f31661/models/mlflow_cnn/versions/1"
+    model_path = Model.get_model_path('mlflow_cnn')
     model = mlflow.pyfunc.load_model(model_path)
 
 def run(raw_data):
