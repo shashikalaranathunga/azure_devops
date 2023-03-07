@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 import subprocess
 import joblib
 
+import mlflow
+
 '''
 IRIS Classification
 '''
@@ -78,7 +80,14 @@ class IRISClassification():
                         create_new_version=True)
         else:
             print('Dataset {} already in workspace '.format(dataset_name))
-        return data_ds      
+        return data_ds  
+
+    def train_model(self, X_train, X_test, y_train, y_test, model):
+        # Early Stopping to prevent overfitting 
+        clf = make_pipeline(StandardScaler(), SVC(kernel='linear', gamma='auto'))
+        clf.fit(X_train, y_train)
+
+        return clf  
 
     def create_pipeline(self):
         '''
@@ -98,24 +107,26 @@ class IRISClassification():
 
         X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
         
-        model = make_pipeline(StandardScaler(), SVC(kernel='linear', gamma='auto'))
-        model.fit(X_train,y_train)
-        y_pred = model.predict(X_test)
-        print("Model Score : ", model.score(X_test,y_test))
+        with mlflow.start_run(run_name="mlflow_test"):
+            # Automatically capture the model's parameters, metrics, artifacts,
+            # and source code with the `autolog()` function
+            mlflow.sklearn.autolog(log_models=True)
 
-        os.makedirs(os.path.dirname(self.args.model_path), exist_ok=True)
-        joblib.dump(model, self.args.model_path)
+            model = self.train_model(X_train, X_test, y_train, y_test)
+            # mlflow.tensorflow.log_model(model, artifact_path="model")
+            run_id = mlflow.active_run().info.run_id
+            mlflow.sklearn.save_model(model, "./svm_model")
+
+        y_pred = model.predict(X_test)
+        print(f"Model Accuracy:{accuracy_score(y_test, y_pred)*100}%")
+
+        model_name = "mlflow_svm"
+        # mlflow.register_model(f"runs:/{run_id}/model", model_name)
+        model_local_path = "./svm_model"
+        mlflow.register_model(f"file://{model_local_path}", model_name)
 
         self.validate(y_test, y_pred, X_test)
 
-        match = re.search('([^\/]*)$', self.args.model_path)
-        # Upload Model to Run artifacts
-        self.run.upload_file(name=self.args.artifact_loc + match.group(1),
-                                path_or_stream=self.args.model_path)
-
-        print("Run Files : ", self.run.get_file_names())
-        subprocess.run("pip freeze > requirements.txt", shell=True)
-        self.run.upload_file(name="./outputs/requirements.txt",path_or_stream="requirements.txt")
         self.run.complete()
 
     def create_confusion_matrix(self, y_true, y_pred, name):
