@@ -84,7 +84,7 @@ class IRISClassification():
             print('Dataset {} already in workspace '.format(dataset_name))
         return data_ds  
 
-    def train_model(self, X_train, X_test, y_train, y_test, model):
+    def train_model(self, X_train, X_test, y_train, y_test):
         # Early Stopping to prevent overfitting 
         clf = make_pipeline(StandardScaler(), SVC(kernel='linear', gamma='auto'))
         clf.fit(X_train, y_train)
