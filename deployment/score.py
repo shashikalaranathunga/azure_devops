@@ -36,9 +36,10 @@ def get_best_model(model_arr):
         if isinstance(model, tf.keras.Model):
             preds = model.predict(np.array(X_test)[..., np.newaxis])
             y_pred = np.argmax(preds, axis=1)
-            score = precision_score(y_test, y_pred, average='weighted')
+            score = precision_score(y_test, list(y_pred), average='weighted')
         else:
             score = precision_score(y_test, model.predict(X_test), average='weighted')
+            
         if score > best_score:
             best_score = score
             best_model = model
@@ -91,7 +92,7 @@ def run(raw_data):
 
         if is_tf:
             preds = model.predict(np.array(test_X)[..., np.newaxis]) 
-            return np.argmax(preds, axis=1)
+            return list(np.argmax(preds, axis=1))
         else:
             return model.predict(test_X)
     except Exception as err:
