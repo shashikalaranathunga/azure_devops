@@ -39,7 +39,7 @@ def get_best_model(model_arr):
             score = precision_score(y_test, list(y_pred), average='weighted')
         else:
             score = precision_score(y_test, model.predict(X_test), average='weighted')
-            
+
         if score > best_score:
             best_score = score
             best_model = model
@@ -65,7 +65,8 @@ def init():
     model_dt_path = Model.get_model_path('mlflow_dt')
     model_dt = mlflow.pyfunc.load_model(model_dt_path)
 
-    model = get_best_model([model_cnn, model_svm, model_dt])
+    # model = get_best_model([model_cnn, model_svm, model_dt])
+    model = model_cnn
     is_tf = isinstance(model, tf.keras.Model)
 
     if is_tf:
