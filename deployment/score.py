@@ -3,6 +3,12 @@ import logging
 import json
 
 from azureml.core.model import Model
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, accuracy_score
+import numpy as np
 import tensorflow as tf
 import mlflow
 
@@ -17,8 +23,14 @@ def init():
     # It is the path to the model folder (./azureml-models/$MODEL_NAME/$VERSION)
     # Please provide your model's folder name if there is one
     # model_path = f"models:/mlflow_cnn/latest"
-    model_path = Model.get_model_path('mlflow_cnn')
-    model = mlflow.pyfunc.load_model(model_path)
+    model_cnn_path = Model.get_model_path('mlflow_cnn')
+    model_cnn = mlflow.pyfunc.load_model(model_cnn_path)
+    model_svm_path = Model.get_model_path('mlflow_svm')
+    model_svm = mlflow.pyfunc.load_model(model_svm_path)
+    model_dt_path = Model.get_model_path('mlflow_dt')
+    model_dt = mlflow.pyfunc.load_model(model_dt_path)
+
+    model = model_dt
 
 def run(raw_data):
     """
