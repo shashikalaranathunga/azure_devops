@@ -30,6 +30,8 @@ def get_best_model(model_arr):
 
     X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
 
+    return model_arr[0]
+
     best_model = None
     best_score = 0
     for model in model_arr:
@@ -65,8 +67,7 @@ def init():
     model_dt_path = Model.get_model_path('mlflow_dt')
     model_dt = mlflow.pyfunc.load_model(model_dt_path)
 
-    # model = get_best_model([model_cnn, model_svm, model_dt])
-    model = model_cnn
+    model = get_best_model([model_cnn, model_svm, model_dt])
     is_tf = isinstance(model, tf.keras.Model)
 
     if is_tf:
@@ -92,9 +93,11 @@ def run(raw_data):
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
 
         if is_tf:
+            return 2
             preds = model.predict(np.array(test_X)[..., np.newaxis]) 
             return list(np.argmax(preds, axis=1))
         else:
+            retun 1
             return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
