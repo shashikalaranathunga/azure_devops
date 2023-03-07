@@ -44,6 +44,8 @@ class IRISClassification():
         self.args = args
         self.run = Run.get_context()
         self.workspace = self.run.experiment.workspace
+        mlflow.set_tracking_uri(self.workspace.get_mlflow_tracking_uri())
+        mlflow.set_experiment("svm_iris_training_v2")
         os.makedirs('./model_metas', exist_ok=True)
 
     def get_latest_dataset_version(self, dataset_name):
