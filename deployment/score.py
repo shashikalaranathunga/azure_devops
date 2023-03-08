@@ -26,7 +26,7 @@ def get_best_model(model_dict):
     df = get_test_df() 
 
     X = df[["SepalLengthCm","SepalWidthCm","PetalLengthCm","PetalWidthCm"]]
-    y = df[["Species"]]
+    y = df["Species"]
 
     X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
 
@@ -36,12 +36,12 @@ def get_best_model(model_dict):
     best_model = None
     best_model_type = None
     best_score = 0
-    for model_name in model_dict:
-        temp_model = model_dict[model_name]
+    for model_name in model_dict.keys():
         try:
-            if isinstance(temp_model, tf.keras.Model):
+            temp_model = model_dict[model_name]
+
+            if (model_name == "CNN") or isinstance(temp_model, tf.keras.Model):
                 preds = temp_model.predict(np.array(X_test)[..., np.newaxis])
-                print(preds)
                 y_pred = np.argmax(preds, axis=1)
                 score = precision_score(y_test, list(y_pred), average='weighted')
                 print(f"tf temp_model processed - {model_name}, score: {score*100}%")
