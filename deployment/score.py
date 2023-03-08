@@ -29,6 +29,7 @@ def get_best_model(model_arr):
     y = df["Species"]
 
     X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
+    y_test = [int(y_var) for y_var in y_test]
 
 
     best_model = None
