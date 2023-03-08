@@ -101,11 +101,9 @@ def run(raw_data):
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
 
         if is_tf:
-            return 2
             preds = model.predict(np.array(test_X)[..., np.newaxis]) 
             return list(np.argmax(preds, axis=1))
         else:
-            return 1
             return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
