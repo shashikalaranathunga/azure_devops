@@ -42,10 +42,10 @@ def get_best_model(model_arr):
                 y_pred = list(np.argmax(preds, axis=1).flatten())
                 y_pred = [int(y_var) for y_var in y_pred]
                 score = precision_score(y_test, y_pred, average='weighted')
-                print("tf temp_model")
+                print(f"TF CNN Model - score {score*100:.2f}%")
             else:
                 score = precision_score(y_test, temp_model.predict(X_test), average='weighted')
-                print("sklearn temp_model")
+                print(f"sklearn temp_model - score {score*100:.2f}%")
 
             if score > best_score:
                 best_score = score
