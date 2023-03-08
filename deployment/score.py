@@ -32,7 +32,7 @@ def get_best_model(model_dict):
 
     y_test = [int(y) for y in y_test]
 
-
+    return model_dict.values()[0]
     best_model = None
     best_model_type = None
     best_score = 0
