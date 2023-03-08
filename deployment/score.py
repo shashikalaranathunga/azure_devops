@@ -36,11 +36,12 @@ def get_best_model(model_arr):
     best_score = 0
     for temp_model in model_arr:
         try:
-            if isinstance(temp_model, tf.keras.Model):
+            if "sklearn" not in str(temp_model):
                 preds = temp_model.predict(np.array(X_test)[..., np.newaxis])
-                print(preds)
-                y_pred = np.argmax(preds, axis=1)
-                score = precision_score(y_test, list(y_pred), average='weighted')
+                print(y_test)
+                y_pred = list(np.argmax(preds, axis=1).flatten())
+                y_pred = [int(y_var) for y_var in y_pred]
+                score = precision_score(y_test, y_pred, average='weighted')
                 print("tf temp_model")
             else:
                 score = precision_score(y_test, temp_model.predict(X_test), average='weighted')
@@ -75,7 +76,7 @@ def init():
     model_dt = mlflow.pyfunc.load_model(model_dt_path)
 
     model = get_best_model([model_cnn, model_svm, model_dt])
-    is_tf = isinstance(model, tf.keras.Model)
+    is_tf = "sklearn" not in str(model)
 
     if is_tf:
         print("Best model type - Tensorflow CNN")
