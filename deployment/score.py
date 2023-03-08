@@ -19,7 +19,7 @@ def get_test_df():
     df = pd.read_csv("https://irisdataversioner.blob.core.windows.net/iris-original/iris_original.csv?sp=r&st=2023-03-07T06:17:08Z&se=2023-07-01T14:17:08Z&sv=2021-06-08&sr=b&sig=5JjD%2Bp%2FSi4Tv%2F%2BoGyHmaIyNyiaxmH%2BBv7K%2FK%2F6QROGI%3D")
     return df
 
-def get_best_model(model_arr):
+def get_best_model(model_dict):
     """
     This function is called to get the best model from the model array
     """
@@ -30,29 +30,36 @@ def get_best_model(model_arr):
 
     X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.4,random_state=1984,stratify=y)
 
+    y_test = [int(y) for y in y_test]
+
 
     best_model = None
+    best_model_type = None
     best_score = 0
-    for temp_model in model_arr:
+    for model_name in model_dict:
+        temp_model = model_dict[model_name]
         try:
             if isinstance(temp_model, tf.keras.Model):
                 preds = temp_model.predict(np.array(X_test)[..., np.newaxis])
                 print(preds)
                 y_pred = np.argmax(preds, axis=1)
                 score = precision_score(y_test, list(y_pred), average='weighted')
-                print("tf temp_model")
+                print(f"tf temp_model processed - {model_name}, score: {score*100}%")
             else:
-                score = precision_score(y_test, temp_model.predict(X_test), average='weighted')
-                print("sklearn temp_model")
+                y_pred = temp_model.predict(X_test)
+                y_pred = [int(y) for y in y_pred]
+                score = precision_score(y_test, y_pred, average='weighted')
+                print(f"sklearn temp_model processed - {model_name}, score: {score*100}%")
 
             if score > best_score:
                 best_score = score
                 best_model = temp_model
+                best_model_type = model_name
         
         except Exception as e:
             print(e)
 
-    return best_model
+    return best_model, best_model_type
 
 
 def init():
@@ -73,13 +80,13 @@ def init():
     model_dt_path = Model.get_model_path('mlflow_dt')
     model_dt = mlflow.pyfunc.load_model(model_dt_path)
 
-    model = get_best_model([model_cnn, model_svm, model_dt])
+    model, model_type = get_best_model({"CNN":model_cnn, "SVM":model_svm, "Decision Tree":model_dt})
     is_tf = isinstance(model, tf.keras.Model)
 
     if is_tf:
-        print("Best model type - Tensorflow CNN")
+        print("Best model type - Tensorflow", model_type)
     else:
-        print("Best model type", type(model).__name__)
+        print("Best model type - Sklearn", model_type)
 
     logging.info("Init complete")
 
@@ -99,11 +106,9 @@ def run(raw_data):
         test_X = list(zip(sepal_l_cm,sepal_w_cm, petal_l_cm, petal_w_cm) )
 
         if is_tf:
-            return 2
             preds = model.predict(np.array(test_X)[..., np.newaxis]) 
             return list(np.argmax(preds, axis=1))
         else:
-            return 1
             return model.predict(test_X)
     except Exception as err:
         traceback.print_exc()
