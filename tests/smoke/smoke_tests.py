@@ -17,5 +17,5 @@ def test_prediction(scoreurl):
     headers = {'Content-Type':'application/json'}
     resp = requests.post(scoreurl, json=json.loads(json.dumps(req_sample)), headers=headers)
     print(resp.text)
-    resp_json = json.loads(resp.text)[0]
+    resp_json = json.loads(resp.text)
     assert (resp_json == 1) or (resp_json == 2) or (resp_json == 0)
